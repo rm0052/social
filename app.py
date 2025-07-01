@@ -4,7 +4,7 @@ from google import genai
 import os
 import uuid
 from streamlit_js_eval import streamlit_js_eval
-from datetime import datetime
+from datetime import datetime, timedelta
 import praw
 
 # --- API KEYS ---
@@ -129,36 +129,45 @@ st.session_state["news_links"] = news_data[session_id]["news_links"]
 st.session_state["chat_history"] = news_data[session_id]["chat_history"]
 
 # --- New Reddit Scraper Function ---
-from datetime import datetime, timedelta
 
 def scrape_reddit_news():
-    subreddits = [
-        "stocks", "investing", "pennystocks", "Options", "SecurityAnalysis",
-        "DividendInvesting", "cryptocurrency", "cryptomarkets", "Bitcoin"
-    ]
-    subreddit = reddit.subreddit("+".join(subreddits))
-    articles = ""
-    links = []
+    try:
+        subreddits = [
+            "stocks", "investing", "pennystocks", "Options", "SecurityAnalysis",
+            "DividendInvesting", "cryptocurrency", "cryptomarkets", "Bitcoin"
+        ]
+        subreddit = reddit.subreddit("+".join(subreddits))
+        articles = ""
+        links = []
 
-    now = datetime.utcnow()
-    cutoff = now - timedelta(days=1)  # 24 hours ago
+        now = datetime.utcnow()
+        cutoff = now - timedelta(days=1)
 
-    for submission in subreddit.new(limit=100):  # fetch more to filter
-        post_time = datetime.utcfromtimestamp(submission.created_utc)
-        if post_time < cutoff:
-            continue
-        if not submission.stickied and not submission.over_18:
-            title = submission.title.strip()
-            url = submission.url
-            selftext = submission.selftext.strip()
-            articles += f"\n\nTitle: {title}\nURL: {url}\nPosted: {post_time.isoformat()} UTC\nContent: {selftext}\n"
-            links.append(url)
+        posts_checked = 0
+        for submission in subreddit.new(limit=100):
+            posts_checked += 1
+            post_time = datetime.utcfromtimestamp(submission.created_utc)
 
-    st.session_state["news_articles"] = articles
-    st.session_state["news_links"] = links
-    news_data[session_id]["news_articles"] = articles
-    news_data[session_id]["news_links"] = links
-    save_news_data(news_data)
+            if post_time < cutoff:
+                continue
+            if not submission.stickied and not submission.over_18:
+                title = submission.title.strip()
+                url = submission.url
+                selftext = submission.selftext.strip()
+                articles += f"\n\nTitle: {title}\nURL: {url}\nPosted: {post_time.isoformat()} UTC\nContent: {selftext}\n"
+                links.append(url)
+
+        st.session_state["news_articles"] = articles
+        st.session_state["news_links"] = links
+        news_data[session_id]["news_articles"] = articles
+        news_data[session_id]["news_links"] = links
+        save_news_data(news_data)
+
+        st.success(f"✅ {len(links)} posts collected from {posts_checked} checked.")
+
+    except Exception as e:
+        st.error(f"❌ Error fetching Reddit posts: {e}")
+
 
 
 # --- Fetch News Button ---
