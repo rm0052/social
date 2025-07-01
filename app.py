@@ -4,7 +4,7 @@ from google import genai
 import os
 import uuid
 from streamlit_js_eval import streamlit_js_eval
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import praw
 
 # --- API KEYS ---
@@ -129,25 +129,19 @@ st.session_state["news_links"] = news_data[session_id]["news_links"]
 st.session_state["chat_history"] = news_data[session_id]["chat_history"]
 
 # --- New Reddit Scraper Function ---
-
 def scrape_reddit_news():
     try:
-        subreddits = [
-            "stocks", "investing", "pennystocks", "Options", "SecurityAnalysis",
-            "DividendInvesting", "cryptocurrency", "cryptomarkets", "Bitcoin"
-        ]
+        subreddits = ["stocks", "investing", "pennystocks", "Options", "SecurityAnalysis",
+                      "DividendInvesting", "cryptocurrency", "cryptomarkets", "Bitcoin"]
         subreddit = reddit.subreddit("+".join(subreddits))
         articles = ""
         links = []
 
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
         cutoff = now - timedelta(days=1)
 
-        posts_checked = 0
         for submission in subreddit.new(limit=100):
-            posts_checked += 1
-            post_time = datetime.utcfromtimestamp(submission.created_utc)
-
+            post_time = datetime.fromtimestamp(submission.created_utc, tz=timezone.utc)
             if post_time < cutoff:
                 continue
             if not submission.stickied and not submission.over_18:
@@ -163,10 +157,11 @@ def scrape_reddit_news():
         news_data[session_id]["news_links"] = links
         save_news_data(news_data)
 
-        st.success(f"✅ {len(links)} posts collected from {posts_checked} checked.")
+        st.success(f"✅ {len(links)} posts collected.")
 
     except Exception as e:
-        st.error(f"❌ Error fetching Reddit posts: {e}")
+        st.error(f"❌ Error: {e}")
+
 
 
 
