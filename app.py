@@ -161,7 +161,7 @@ def scrape_reddit_news():
     save_news_data(news_data)
 
 
---- Fetch News Button ---
+# --- Fetch News Button ---
 if st.button("Fetch latest Reddit news"):
     st.write("🔍 Fetching Reddit news articles...")
     scrape_reddit_news()
