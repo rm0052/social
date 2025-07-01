@@ -6,7 +6,6 @@ import uuid
 from streamlit_js_eval import streamlit_js_eval
 from datetime import datetime, timedelta, timezone
 import praw
-import traceback
 
 
 # --- API KEYS ---
@@ -143,10 +142,9 @@ def scrape_reddit_news():
         articles = ""
         links = []
         try:
-            posts = list(subreddit.new(limit=100))
+            posts = list(subreddit.new(limit=25))
         except Exception as fetch_error:
             st.error(f"⚠️ Reddit fetch failed: {fetch_error}")
-            st.text(traceback.format_exc())
             return
         for submission in posts:
             post_time = datetime.fromtimestamp(submission.created_utc, tz=timezone.utc)
