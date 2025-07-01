@@ -134,13 +134,20 @@ def scrape_reddit_news():
         subreddits = ["stocks", "investing", "pennystocks", "Options", "SecurityAnalysis",
                       "DividendInvesting", "cryptocurrency", "cryptomarkets", "Bitcoin"]
         subreddit = reddit.subreddit("+".join(subreddits))
-        articles = ""
-        links = []
 
         now = datetime.now(timezone.utc)
         cutoff = now - timedelta(days=1)
 
-        for submission in subreddit.new(limit=100):
+        articles = ""
+        links = []
+
+        try:
+            posts = list(subreddit.new(limit=100))
+        except Exception as fetch_error:
+            st.error(f"⚠️ Reddit fetch failed: {fetch_error}")
+            return
+
+        for submission in posts:
             post_time = datetime.fromtimestamp(submission.created_utc, tz=timezone.utc)
             if post_time < cutoff:
                 continue
@@ -157,10 +164,11 @@ def scrape_reddit_news():
         news_data[session_id]["news_links"] = links
         save_news_data(news_data)
 
-        st.success(f"✅ {len(links)} posts collected.")
+        st.success(f"✅ Collected {len(links)} Reddit posts from the last 24 hours.")
 
     except Exception as e:
-        st.error(f"❌ Error: {e}")
+        st.error(f"❌ Unexpected error: {e}")
+
 
 
 
