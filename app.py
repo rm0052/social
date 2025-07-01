@@ -19,7 +19,7 @@ reddit = praw.Reddit(
     client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
     username=os.getenv("REDDIT_USERNAME"),
     password=os.getenv("REDDIT_PASSWORD"),
-    user_agent="silverbot by u/Recent_Body981"
+    user_agent="redditnews by u/Recent_Body981"
 )
 
 # --- App Setup ---
@@ -142,7 +142,7 @@ def scrape_reddit_news():
         articles = ""
         links = []
         try:
-            posts = list(subreddit.new(limit=25))
+            posts = list(subreddit.new(limit=100))
         except Exception as fetch_error:
             st.error(f"⚠️ Reddit fetch failed: {fetch_error}")
             return
