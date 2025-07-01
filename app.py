@@ -132,8 +132,7 @@ st.session_state["chat_history"] = news_data[session_id]["chat_history"]
 # --- New Reddit Scraper Function ---
 def scrape_reddit_news():
     try:
-        subreddits = ["stocks", "investing", "pennystocks", "Options", "SecurityAnalysis",
-                      "DividendInvesting", "cryptocurrency", "cryptomarkets", "Bitcoin"]
+        subreddits = ["wallstreetbets"]
         subreddit = reddit.subreddit("+".join(subreddits))
 
         now = datetime.now(timezone.utc)
