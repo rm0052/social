@@ -14,10 +14,10 @@ DATA_FILE = "news_data2.json"
 
 # --- Reddit API Setup ---
 reddit = praw.Reddit(
-    client_id="qTGIHLm1JS_oC-raKNNNtA",
-    client_secret="XnynsOKBktJN1HyRegE5zEZ1GPjWGg",
-    username="Recent_Body981",
-    password="Cricket$4080",
+    client_id=os.getenv("REDDIT_CLIENT_ID"),
+    client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
+    username=os.getenv("REDDIT_USERNAME"),
+    password=os.getenv("REDDIT_PASSWORD"),
     user_agent="silverbot by u/Recent_Body981"
 )
 
