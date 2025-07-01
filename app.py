@@ -129,6 +129,8 @@ st.session_state["news_links"] = news_data[session_id]["news_links"]
 st.session_state["chat_history"] = news_data[session_id]["chat_history"]
 
 # --- New Reddit Scraper Function ---
+from datetime import datetime, timedelta
+
 def scrape_reddit_news():
     subreddits = [
         "stocks", "investing", "pennystocks", "Options", "SecurityAnalysis",
@@ -138,12 +140,18 @@ def scrape_reddit_news():
     articles = ""
     links = []
 
-    for submission in subreddit.new(limit=25):
+    now = datetime.utcnow()
+    cutoff = now - timedelta(days=1)  # 24 hours ago
+
+    for submission in subreddit.new(limit=100):  # fetch more to filter
+        post_time = datetime.utcfromtimestamp(submission.created_utc)
+        if post_time < cutoff:
+            continue
         if not submission.stickied and not submission.over_18:
             title = submission.title.strip()
             url = submission.url
             selftext = submission.selftext.strip()
-            articles += f"\n\nTitle: {title}\nURL: {url}\nContent: {selftext}\n"
+            articles += f"\n\nTitle: {title}\nURL: {url}\nPosted: {post_time.isoformat()} UTC\nContent: {selftext}\n"
             links.append(url)
 
     st.session_state["news_articles"] = articles
@@ -151,6 +159,7 @@ def scrape_reddit_news():
     news_data[session_id]["news_articles"] = articles
     news_data[session_id]["news_links"] = links
     save_news_data(news_data)
+
 
 # --- Fetch News Button ---
 # if st.button("Fetch latest Reddit news"):
