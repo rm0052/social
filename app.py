@@ -23,7 +23,7 @@ reddit = praw.Reddit(
 )
 
 # --- App Setup ---
-st.title("📈 Reddit News Chatbot")
+st.title("Reddit News Chatbot")
 
 if "session_id" not in st.session_state:
     st.session_state["session_id"] = str(uuid.uuid4())
