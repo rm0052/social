@@ -1,3 +1,4 @@
 praw
 google-genai
 streamlit-js-eval
+supabase
