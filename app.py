@@ -94,7 +94,6 @@ if not user_id:
 else:
     st.success("✅ Welcome back!")
     user_email = st.session_state.get("get_user_id")
-    if user_email:
     try:
         response = supabase.table("emails").select("email").eq("email", user_email).execute()
         if response.data:
