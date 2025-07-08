@@ -31,9 +31,10 @@ if "session_id" not in st.session_state:
 session_id = st.session_state["session_id"]
 
 # --- Save Email Function ---
-SUPABASE_URL = st.secrets["https://gctshevwjqputkhywwev.supabase.co"]
-SUPABASE_KEY = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjdHNoZXZ3anFwdXRraHl3d2V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5Mzg4OTksImV4cCI6MjA2NzUxNDg5OX0.AOQFTeBoTrkvaSxjG-XiIa7xXUqM09jRM-ZkJGbDsZA"]
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def save_email(email):
     email = email.strip().lower()
