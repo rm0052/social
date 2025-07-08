@@ -4,7 +4,8 @@ from google import genai
 import os
 import uuid
 from streamlit_js_eval import streamlit_js_eval
-from datetime import datetime, timedelta, timezone
+from supabase import create_client
+from datetime import datetime, timezone
 import praw
 
 
@@ -30,28 +31,28 @@ if "session_id" not in st.session_state:
 session_id = st.session_state["session_id"]
 
 # --- Save Email Function ---
+SUPABASE_URL = st.secrets["https://gctshevwjqputkhywwev.supabase.co"]
+SUPABASE_KEY = st.secrets["eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjdHNoZXZ3anFwdXRraHl3d2V2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE5Mzg4OTksImV4cCI6MjA2NzUxNDg5OX0.AOQFTeBoTrkvaSxjG-XiIa7xXUqM09jRM-ZkJGbDsZA"]
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 def save_email(email):
     email = email.strip().lower()
-    now = datetime.utcnow().isoformat()
-    if os.path.exists(EMAIL_LOG):
-        with open(EMAIL_LOG, "r") as f:
-            try:
-                email_data = json.load(f)
-            except json.JSONDecodeError:
-                email_data = {}
+    now = datetime.now(timezone.utc).isoformat()
+
+    existing = supabase.table("emails").select("*").eq("email", email).execute()
+    if existing.data:
+        user = existing.data[0]
+        supabase.table("emails").update({
+            "last_visit": now,
+            "num_visits": user["num_visits"] + 1
+        }).eq("email", email).execute()
     else:
-        email_data = {}
-    if email in email_data:
-        email_data[email]["last_visit"] = now
-        email_data[email]["num_visits"] += 1
-    else:
-        email_data[email] = {
+        supabase.table("emails").insert([{
+            "email": email,
             "first_visit": now,
             "last_visit": now,
             "num_visits": 1
-        }
-    with open(EMAIL_LOG, "w") as f:
-        json.dump(email_data, f, indent=2)
+        }]).execute()
 
 # --- Admin Panel (Optional) ---
 SECRET_ADMIN_CODE = os.getenv("SECRET_ADMIN_CODE", "letmein")
@@ -71,14 +72,9 @@ def show_admin_panel():
             st.error("Incorrect password.")
         st.stop()
     st.success("Welcome Admin!")
-    if os.path.exists(EMAIL_LOG):
-        with open(EMAIL_LOG, "r") as f:
-            try:
-                email_data = json.load(f)
-            except json.JSONDecodeError:
-                st.error("Failed to parse email data.")
-                st.stop()
-        st.json(email_data)
+    response = supabase.table("emails").select("*").execute()
+    if response.data:
+        st.json(response.data)
     else:
         st.info("No emails collected.")
 
@@ -98,14 +94,14 @@ if not user_id:
 else:
     st.success("✅ Welcome back!")
     user_email = st.session_state.get("get_user_id")
-    if os.path.exists(EMAIL_LOG):
-        with open(EMAIL_LOG, "r") as f:
-            try:
-                email_data = json.load(f)
-                if user_email in email_data:
-                    save_email(user_email)
-            except json.JSONDecodeError:
-                st.warning("Could not load visit data.")
+    if user_email:
+    try:
+        response = supabase.table("emails").select("email").eq("email", user_email).execute()
+        if response.data:
+            save_email(user_email)
+    except Exception as e:
+        st.warning(f"Could not load visit data from Supabase: {e}")
+
 
 # --- Load and Save News Data ---
 def load_news_data():
