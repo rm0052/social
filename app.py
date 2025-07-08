@@ -4,7 +4,7 @@ from google import genai
 import os
 import uuid
 from streamlit_js_eval import streamlit_js_eval
-from supabase import create_client
+from supabase import create_client, Client
 from datetime import datetime, timezone
 import praw
 
