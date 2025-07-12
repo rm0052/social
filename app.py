@@ -20,7 +20,7 @@ reddit = praw.Reddit(
     client_secret=os.getenv("REDDIT_CLIENT_SECRET"),
     username=os.getenv("REDDIT_USERNAME"),
     password=os.getenv("REDDIT_PASSWORD"),
-    user_agent="script:redditnewsbot:v1.0 (by u/Recent_Body981)"
+    user_agent="redditnewsbot by u/Recent_Body981"
 )
 
 # --- App Setup ---
