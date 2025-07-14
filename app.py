@@ -131,7 +131,6 @@ def scrape_reddit_news():
         subreddit = reddit.subreddit("+".join(subreddits))
 
         now = datetime.now(timezone.utc)
-        print("timedelta is:", timedelta)
         cutoff = now - timedelta(days=1)
 
         articles = ""
