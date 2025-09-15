@@ -1,6 +1,6 @@
 import streamlit as st
 import json
-from google import genai
+from google.generativeai import genai
 import os
 import uuid
 from streamlit_js_eval import streamlit_js_eval
@@ -190,10 +190,10 @@ if question:
     else:
         st.write("🔗 Fetching content from saved Reddit posts...")
         links = st.session_state["news_links"]
-        client = genai.Client(api_key=GENAI_API_KEY)
-
+        genai.configure(api_key="GENAI_API_KEY")
+        model = genai.GenerativeModel("gemini-2.0-flash")
         prompt = f"Answer only yes or no if the question requires specific information from the Reddit posts. Question: {question} links: {links}."
-        response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+        response = model.generate_content(prompt)
         answer = response.text.strip()
 
         if answer.lower() == "yes":
