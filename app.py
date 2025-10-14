@@ -6,7 +6,7 @@ from streamlit_js_eval import streamlit_js_eval
 from supabase import create_client, Client
 from datetime import datetime, timedelta, timezone
 import praw
-
+import os
 
 # --- API KEYS ---
 GENAI_API_KEY = "AIzaSyDFbnYmLQ1Q55jIYYmgQ83sxledB_MgTbw"
