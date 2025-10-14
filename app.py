@@ -1,7 +1,6 @@
 import streamlit as st
 import json
-from google.generativeai import genai
-import os
+import google.generativeai as genai
 import uuid
 from streamlit_js_eval import streamlit_js_eval
 from supabase import create_client, Client
@@ -202,7 +201,7 @@ if question:
             final_prompt = f'''These links are Reddit posts related to finance and cryptocurrency. Today is July 1st. Question: {question}. Respond with the links that are useful: {links}'''
 
         final_response = client.models.generate_content(
-            model="gemini-2.0-flash", contents=final_prompt
+            model="gemini-2.0-flash-lite", contents=final_prompt
         )
 
         st.session_state["chat_history"].append(
