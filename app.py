@@ -189,7 +189,7 @@ if question:
     else:
         st.write("🔗 Fetching content from saved Reddit posts...")
         links = st.session_state["news_links"]
-        genai.configure(api_key="GENAI_API_KEY")
+        genai.configure(api_key=GENAI_API_KEY)
         model = genai.GenerativeModel("gemini-2.0-flash-lite")
         prompt = f"Answer only yes or no if the question requires specific information from the Reddit posts. Question: {question} links: {links}."
         response = model.generate_content(prompt)
