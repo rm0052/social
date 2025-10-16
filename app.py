@@ -200,10 +200,7 @@ if question:
         else:
             final_prompt = f'''These links are Reddit posts related to finance and cryptocurrency. Today is July 1st. Question: {question}. Respond with the links that are useful: {links}'''
 
-        final_response = client.models.generate_content(
-            model="gemini-2.0-flash-lite", contents=final_prompt
-        )
-
+        final_response=model.generate_content(final_prompt)
         st.session_state["chat_history"].append(
             (question, final_response.text.replace("$", "\\$").replace("provided text", "available information"))
         )
