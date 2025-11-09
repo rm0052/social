@@ -9,7 +9,7 @@ import praw
 import os
 
 # --- API KEYS ---
-GENAI_API_KEY = "AIzaSyDFbnYmLQ1Q55jIYYmgQ83sxledB_MgTbw"
+GENAI_API_KEY = "AIzaSyAUGzXVbqKi0d6QL2NDkQd64ocfdleEpuE"
 EMAIL_LOG = "emails.json"
 DATA_FILE = "news_data2.json"
 
