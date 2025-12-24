@@ -1,6 +1,6 @@
 import streamlit as st
 import json
-import google.generativeai as genai
+from groq import Groq
 import uuid
 from streamlit_js_eval import streamlit_js_eval
 from supabase import create_client, Client
@@ -9,7 +9,7 @@ import praw
 import os
 
 # --- API KEYS ---
-GENAI_API_KEY = "AIzaSyAUGzXVbqKi0d6QL2NDkQd64ocfdleEpuE"
+groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 EMAIL_LOG = "emails.json"
 DATA_FILE = "news_data2.json"
 
@@ -189,20 +189,18 @@ if question:
     else:
         st.write("🔗 Fetching content from saved Reddit posts...")
         links = st.session_state["news_links"]
-        genai.configure(api_key=GENAI_API_KEY)
-        model = genai.GenerativeModel("gemini-1.5-flash")
         prompt = f"Answer only yes or no if the question requires specific information from the Reddit posts. Question: {question} links: {links}."
-        response = model.generate_content(prompt)
-        answer = response.text.strip()
+        response = groq_generate(prompt)
+        answer = response.strip()
 
         if answer.lower() == "yes":
             final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to. Question: {question} links: {links}"
         else:
             final_prompt = f'''These links are Reddit posts related to finance and cryptocurrency. Today is July 1st. Question: {question}. Respond with the links that are useful: {links}'''
 
-        final_response=model.generate_content(final_prompt)
+        final_response=groq_generate(final_prompt)
         st.session_state["chat_history"].append(
-            (question, final_response.text.replace("$", "\\$").replace("provided text", "available information"))
+            (question, final_response.replace("$", "\\$").replace("provided text", "available information"))
         )
         news_data[session_id]["chat_history"] = st.session_state["chat_history"]
         save_news_data(news_data)
