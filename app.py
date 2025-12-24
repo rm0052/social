@@ -100,6 +100,17 @@ else:
     except Exception as e:
         st.warning(f"Could not load visit data from Supabase: {e}")
 
+def groq_generate(prompt):
+    completion = groq_client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.3,
+        max_tokens=1024,
+    )
+    return completion.choices[0].message.content
 
 # --- Load and Save News Data ---
 def load_news_data():
