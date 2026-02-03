@@ -200,14 +200,14 @@ if question:
     else:
         st.write("🔗 Fetching content from saved Reddit posts...")
         links = st.session_state["news_links"]
-        prompt = f"Answer only yes or no if the question requires specific information from the Reddit posts. Question: {question} links: {links}."
+        prompt = f"Each link represents a reddit post. Answer yes if the question can be answered from the Reddit posts and no otherwise. Question: {question} links: {links}."
         response = groq_generate(prompt)
         answer = response.strip()
 
         if answer.lower() == "yes":
-            final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to. Question: {question} links: {links}"
+            final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {links}"
         else:
-            final_prompt = f'''These links are Reddit posts related to finance and cryptocurrency. Today is July 1st. Question: {question}. Respond with the links that are useful: {links}'''
+            final_prompt = f'''This question cannot be answered based on the Reddit posts since there is no discussion on this subject. Please ask another question.'''
 
         final_response=groq_generate(final_prompt)
         st.session_state["chat_history"].append(
