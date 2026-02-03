@@ -200,7 +200,7 @@ if question:
     else:
         st.write("🔗 Fetching content from saved Reddit posts...")
         links = st.session_state["news_links"]
-        prompt = f"Each link represents a reddit post. Answer yes if the question can be answered from the Reddit posts and no otherwise. Question: {question} links: {links}."
+        prompt = f"Answer yes or no if the question can be answered from the Reddit links. Question: {question} links: {links}."
         response = groq_generate(prompt)
         answer = response.strip()
 
