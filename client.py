@@ -173,7 +173,6 @@ class MCPClient:
 
 
 def get_client():
-    """Get singleton instance of RedditRAG"""
     global _client
     if _client is None:
         _client = MCPClient()
