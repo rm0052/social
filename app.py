@@ -319,7 +319,7 @@ if question:
     server_url = f"http://localhost:{args.mcp_localhost_port}/mcp"
     print(f"Connecting to server at: {server_url}")
     
-    await client.connect_to_streamable_http_server(
+    client.connect_to_streamable_http_server(
         server_url,
         headers=headers
     )
