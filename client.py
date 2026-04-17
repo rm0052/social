@@ -153,17 +153,10 @@ class MCPClient:
           # Process the response from the server using the helper method
           response = await self._process_tool_response(result.content, f"r/{subreddit}")
           
-          # Handle response that could be a list or a string
-          if isinstance(response, list):
-              print("\n" + "\n".join(response))
-          else:
-              print("\n" + response)
+          return response
       except Exception as e:
           error_msg = f"Error fetching Reddit threads: {str(e)}"
           print(error_msg)
-        except Exception as e:
-        print(f"\nError: {str(e)}")
-        traceback.print_exc()
 
     async def cleanup(self):
         """Properly clean up the session and streams"""
