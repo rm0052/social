@@ -3,12 +3,6 @@
 A client for interacting with the Reddit MCP server, which provides tools for fetching
 Reddit content such as hot threads from subreddits and detailed post information with comments.
 
-This client provides a command-line interface with the following commands:
-- hot <subreddit> [limit] - Fetch hot threads from a subreddit
-- post <post_id> [comment_limit] [comment_depth] - Fetch a specific post with comments
-- query <text> - Process a general query using Claude and available tools
-- help - Show available commands
-- quit - Exit the client
 """
 
 import argparse
