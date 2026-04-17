@@ -7,6 +7,152 @@ from supabase import create_client, Client
 from datetime import datetime, timedelta, timezone
 import praw
 import os
+import argparse
+import json
+import logging
+from typing import Any, Dict, List, Optional, AsyncGenerator
+import requests
+from pydantic import Field
+from fastmcp.server.dependencies import get_http_request
+from starlette.requests import Request
+from starlette.responses import JSONResponse
+from fastmcp import FastMCP
+from client import get_client
+
+# Get RAG instance
+client = get_client()
+
+# Initialize FastMCP server for Airtable tools
+reddit_mcp = FastMCP(name="reddit-mcp-server")
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+
+def get_reddit_client(request: Request) -> Dict[str, str]:
+    """Extract Reddit credentials from HTTP headers."""
+    # Check for authentication header
+    api_key = request.headers.get("X-Api-Key", "")
+    if not api_key:
+        raise ValueError("Missing required authentication header: X-Api-Key")
+    
+    # Extract credentials from headers
+    client_id = request.headers.get("REDDIT-CLIENT-ID", "")
+    client_secret = request.headers.get("REDDIT-CLIENT-SECRET", "")
+    refresh_token = request.headers.get("REDDIT-REFRESH-TOKEN", "")
+    
+    # Validate that all required headers are present
+    missing_headers = []
+    if not client_id:
+        missing_headers.append("REDDIT-CLIENT-ID")
+    if not client_secret:
+        missing_headers.append("REDDIT-CLIENT-SECRET")
+    if not refresh_token:
+        missing_headers.append("REDDIT-REFRESH-TOKEN")
+    
+    if missing_headers:
+        raise ValueError(f"Missing required Reddit headers: {', '.join(missing_headers)}")
+
+    # Return the credentials
+    return {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "refresh_token": refresh_token,
+        "base_url": "https://oauth.reddit.com"
+    }
+
+def get_access_token(credentials: Dict[str, str]) -> str:
+    """Get an access token using the refresh token."""
+    auth = (credentials['client_id'], credentials['client_secret'])
+    data = {
+        'grant_type': 'refresh_token',
+        'refresh_token': credentials['refresh_token']
+    }
+    headers = {
+        'User-Agent': 'MCP-Reddit-Client/1.0'
+    }
+    
+    response = requests.post(
+        'https://www.reddit.com/api/v1/access_token',
+        auth=auth,
+        data=data,
+        headers=headers
+    )
+    response.raise_for_status()
+    return response.json()['access_token']
+
+def make_reddit_request(endpoint: str, credentials: Dict[str, str], params: Optional[Dict[str, Any]] = None) -> requests.Response:
+    """Make a GET request to the Reddit API."""
+    url = f"{credentials['base_url']}{endpoint}"
+    
+    # Get an access token using the refresh token
+    try:
+        access_token = get_access_token(credentials)
+        
+        # Create headers with authorization using the access token
+        headers = {
+            "User-Agent": "MCP-Reddit-Client/1.0",
+            "Authorization": f"Bearer {access_token}"
+        }
+        
+        # Log the request for debugging
+        logger.info(f"Making request to {url} with params: {params}")
+        
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        return response
+    except Exception as e:
+        logger.error(f"Error making Reddit request: {str(e)}")
+        raise
+
+@reddit_mcp.tool()
+async def fetch_reddit_hot_threads(subreddit: str, limit: int = 10) -> str:
+        """
+        Fetch hot threads from a specified subreddit using the Reddit MCP server
+        
+        Args:
+            subreddit: Name of the subreddit (without the 'r/' prefix)
+            limit: Maximum number of threads to fetch (default: 10)
+            
+        Returns:
+            String containing the fetched Reddit threads information
+        """
+        try:
+            request: Request = get_http_request()
+            client = get_reddit_client(request)
+            
+            # Make the request to Reddit API
+            endpoint = f"/r/{subreddit}/hot"
+            params = {"limit": limit}
+            
+            response = make_reddit_request(endpoint, client, params)
+            content = response.json()
+            
+            # Process the response
+            if not content or "data" not in content or "children" not in content["data"]:
+                return f"No threads found in r/{subreddit}"
+                
+            threads = content["data"]["children"]
+            result = []
+            
+            for i, thread in enumerate(threads, 1):
+                thread_data = thread["data"]
+                title = thread_data.get("title", "No title")
+                author = thread_data.get("author", "Unknown")
+                score = thread_data.get("score", 0)
+                num_comments = thread_data.get("num_comments", 0)
+                permalink = thread_data.get("permalink", "")
+                url = f"https://www.reddit.com{permalink}"
+                
+                thread_info = f"{i}. {title}\n   by u/{author} | Score: {score} | Comments: {num_comments}\n   {url}\n"
+                result.append(thread_info)
+                
+            return "\n".join(result)
+        except Exception as e:
+            error_msg = f"Error fetching Reddit threads: {str(e)}"
+            print(error_msg)
+            return error_msg
 
 # --- API KEYS ---
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -134,53 +280,9 @@ st.session_state["news_articles"] = news_data[session_id]["news_articles"]
 st.session_state["news_links"] = news_data[session_id]["news_links"]
 st.session_state["chat_history"] = news_data[session_id]["chat_history"]
 
-# --- New Reddit Scraper Function ---
-def scrape_reddit_news():
-    try:
-        subreddits = ["stocks","investing","pennystocks","Options","SecurityAnalysis","DividendInvesting","cryptocurrency","cryptomarkets","Bitcoin","wallstreetbets"]
-        subreddit = reddit.subreddit("+".join(subreddits))
-
-        now = datetime.now(timezone.utc)
-        cutoff = now - timedelta(days=1)
-
-        articles = ""
-        links = []
-        try:
-            posts = list(subreddit.new(limit=100))
-        except Exception as fetch_error:
-            st.error(f"⚠️ Reddit fetch failed: {fetch_error}")
-            return
-        for submission in posts:
-            post_time = datetime.fromtimestamp(submission.created_utc, tz=timezone.utc)
-            if post_time < cutoff:
-                continue
-            if not submission.stickied and not submission.over_18:
-                title = submission.title.strip()
-                url = submission.url
-                selftext = submission.selftext.strip()
-                articles += f"\n\nTitle: {title}\nURL: {url}\nPosted: {post_time.isoformat()} UTC\nContent: {selftext}\n"
-                links.append(url)
-
-        st.session_state["news_articles"] = articles
-        st.session_state["news_links"] = links
-        news_data[session_id]["news_articles"] = articles
-        news_data[session_id]["news_links"] = links
-        save_news_data(news_data)
-
-        st.success(f"✅ Collected {len(links)} Reddit posts from the last 24 hours.")
-
-    except Exception as e:
-        st.error(f"❌ Unexpected error: {e}")
+subreddits = ["stocks","investing","pennystocks","Options","SecurityAnalysis","DividendInvesting","cryptocurrency","cryptomarkets","Bitcoin","wallstreetbets"]
 
 
-
-
-
-# --- Fetch News Button ---
-if st.button("Fetch latest Reddit news"):
-    st.write("🔍 Fetching Reddit news articles...")
-    scrape_reddit_news()
-    st.write(f"✅ {len(st.session_state['news_links'])} Reddit posts collected.")
 
 # --- Chat History Display ---
 st.write("## Chat History")
@@ -195,16 +297,39 @@ question = st.chat_input("Type your question and press Enter...")
 st.write("Questions or feedback? Email hello@stockdoc.biz.")
 
 if question:
-    if not st.session_state["news_links"]:
-        st.warning("⚠️ No articles found. Click 'Fetch latest Reddit news' first.")
-    else:
-        st.write("🔗 Fetching content from saved Reddit posts...")
-        links = st.session_state["news_links"]
-        final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {links}"
-        final_response=groq_generate(final_prompt)
-        st.session_state["chat_history"].append(
-            (question, final_response.replace("$", "\\$").replace("provided text", "available information"))
-        )
-        news_data[session_id]["chat_history"] = st.session_state["chat_history"]
-        save_news_data(news_data)
-        st.rerun()
+    parser = argparse.ArgumentParser(description="Run Reddit MCP Client to interact with Reddit content")
+    parser.add_argument(
+        "--mcp-localhost-port", type=int, default=8123, help="Localhost port to bind to"
+    )
+    args = parser.parse_args()
+    client = MCPClient()
+    headers = {
+            "X-Api-Key": "123",  # Basic API key for authentication
+            "REDDIT-CLIENT-ID": reddit_client_id,
+            "REDDIT-CLIENT-SECRET": reddit_client_secret,
+            "REDDIT-REFRESH-TOKEN": reddit_refresh_token
+        }
+    print("Using headers with Reddit credentials (values redacted for security):")
+        redacted_headers = {
+            k: (v[:5] + "..." if k.startswith("REDDIT-") and v else v) 
+            for k, v in headers.items()
+        }
+    print(f"Headers: {redacted_headers}")
+        
+    server_url = f"http://localhost:{args.mcp_localhost_port}/mcp"
+    print(f"Connecting to server at: {server_url}")
+    
+    await client.connect_to_streamable_http_server(
+        server_url,
+        headers=headers
+    )
+    print("Connected to server successfully")
+    response=client.chat_loop()
+    final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {response}"
+    final_response=groq_generate(final_prompt)
+    st.session_state["chat_history"].append(
+        (question, final_response.replace("$", "\\$").replace("provided text", "available information"))
+    )
+    news_data[session_id]["chat_history"] = st.session_state["chat_history"]
+    save_news_data(news_data)
+    st.rerun()
