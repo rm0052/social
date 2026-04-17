@@ -310,10 +310,10 @@ if question:
             "REDDIT-REFRESH-TOKEN": reddit_refresh_token
         }
     print("Using headers with Reddit credentials (values redacted for security):")
-        redacted_headers = {
-            k: (v[:5] + "..." if k.startswith("REDDIT-") and v else v) 
-            for k, v in headers.items()
-        }
+    redacted_headers = {
+        k: (v[:5] + "..." if k.startswith("REDDIT-") and v else v) 
+        for k, v in headers.items()
+    }
     print(f"Headers: {redacted_headers}")
         
     server_url = f"http://localhost:{args.mcp_localhost_port}/mcp"
