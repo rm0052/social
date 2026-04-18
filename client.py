@@ -136,7 +136,7 @@ class MCPClient:
         else:
             return content
 
-    async def chat_loop(self):
+    async def chat_loop(self,subreddit,limit):
       try:
           print(f"Fetching hot threads from r/{subreddit}...")
           result = await self.session.call_tool(
