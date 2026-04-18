@@ -295,7 +295,7 @@ question = st.chat_input("Type your question and press Enter...")
 st.write("Questions or feedback? Email hello@stockdoc.biz.")
 
 if question:
-    async def fetch()
+    async def fetch():
         parser = argparse.ArgumentParser(description="Run Reddit MCP Client to interact with Reddit content")
         parser.add_argument(
             "--mcp-localhost-port", type=int, default=8123, help="Localhost port to bind to"
