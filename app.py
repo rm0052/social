@@ -325,7 +325,7 @@ if question:
         }
         print(f"Headers: {redacted_headers}")
             
-        server_url = f"http://localhost:{args.mcp_localhost_port}/mcp"
+        server_url = "server_url = "http://127.0.0.1:8134/mcp"
         print(f"Connecting to server at: {server_url}")
         
         await client.connect_to_streamable_http_server(
