@@ -19,9 +19,6 @@ from starlette.responses import JSONResponse
 from fastmcp import FastMCP
 from client import get_client
 
-# Get RAG instance
-client = get_client()
-
 # Initialize FastMCP server for Airtable tools
 reddit_mcp = FastMCP(name="reddit-mcp-server")
 
@@ -302,7 +299,7 @@ if question:
         "--mcp-localhost-port", type=int, default=8123, help="Localhost port to bind to"
     )
     args = parser.parse_args()
-    client = MCPClient()
+    client = get_client()
     headers = {
             "X-Api-Key": "123",  # Basic API key for authentication
             "REDDIT-CLIENT-ID": reddit_client_id,
