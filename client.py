@@ -159,7 +159,7 @@ class MCPClient:
         await self.exit_stack.aclose()
         self.session = None
 
-
+_client = None
 def get_client():
     global _client
     if _client is None:
