@@ -317,10 +317,10 @@ if question:
     server_url = f"http://localhost:{args.mcp_localhost_port}/mcp"
     print(f"Connecting to server at: {server_url}")
     
-    client.connect_to_streamable_http_server(
+    asyncio.run(client.connect_to_streamable_http_server(
         server_url,
         headers=headers
-    )
+    ))
     print("Connected to server successfully")
     response=asyncio.run(client.chat_loop("wallstreetbets", 5))
     final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {response}"
