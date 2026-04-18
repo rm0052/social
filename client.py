@@ -36,7 +36,6 @@ class MCPClient:
         # Initialize session and client objects
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
-        self.anthropic = Anthropic()
         # Initialize context attributes to None to avoid attribute errors
         self._session_context = None
         self._streams_context = None
