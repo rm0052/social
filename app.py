@@ -321,7 +321,7 @@ if question:
         headers=headers
     )
     print("Connected to server successfully")
-    response=client.chat_loop()
+    response=await client.chat_loop("wallstreetbets", 5)
     final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {response}"
     final_response=groq_generate(final_prompt)
     st.session_state["chat_history"].append(
