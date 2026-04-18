@@ -20,12 +20,7 @@ except ImportError as e:
     print(f"Error importing MCP modules: {e}")
     sys.exit(1)
 
-try:
-    from anthropic import Anthropic
-    print("Successfully imported Anthropic module")
-except ImportError as e:
-    print(f"Error importing Anthropic module: {e}")
-    sys.exit(1)
+
 
 
 class MCPClient:
