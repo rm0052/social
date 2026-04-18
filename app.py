@@ -344,3 +344,10 @@ if question:
     news_data[session_id]["chat_history"] = st.session_state["chat_history"]
     save_news_data(news_data)
     st.rerun()
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Run MCP Streamable HTTP based Reddit server")
+    parser.add_argument("--port", type=int, default=8134, help="Localhost port to listen on")
+    args = parser.parse_args()
+
+    reddit_mcp.run(transport="streamable-http", host="0.0.0.0", port=args.port)
