@@ -295,34 +295,37 @@ question = st.chat_input("Type your question and press Enter...")
 st.write("Questions or feedback? Email hello@stockdoc.biz.")
 
 if question:
-    parser = argparse.ArgumentParser(description="Run Reddit MCP Client to interact with Reddit content")
-    parser.add_argument(
-        "--mcp-localhost-port", type=int, default=8123, help="Localhost port to bind to"
-    )
-    args = parser.parse_args()
-    client = get_client()
-    headers = {
-            "X-Api-Key": "123",  # Basic API key for authentication
-            "REDDIT-CLIENT-ID": "Ly24yiY7yWoF5CboIG217w",
-            "REDDIT-CLIENT-SECRET": "iffbq4WIHgjEFUvsFFzAdqzbSsFYNQ",
-            "REDDIT-REFRESH-TOKEN": "123"
+    async def fetch()
+        parser = argparse.ArgumentParser(description="Run Reddit MCP Client to interact with Reddit content")
+        parser.add_argument(
+            "--mcp-localhost-port", type=int, default=8123, help="Localhost port to bind to"
+        )
+        args = parser.parse_args()
+        client = get_client()
+        headers = {
+                "X-Api-Key": "123",  # Basic API key for authentication
+                "REDDIT-CLIENT-ID": "Ly24yiY7yWoF5CboIG217w",
+                "REDDIT-CLIENT-SECRET": "iffbq4WIHgjEFUvsFFzAdqzbSsFYNQ",
+                "REDDIT-REFRESH-TOKEN": "123"
+            }
+        print("Using headers with Reddit credentials (values redacted for security):")
+        redacted_headers = {
+            k: (v[:5] + "..." if k.startswith("REDDIT-") and v else v) 
+            for k, v in headers.items()
         }
-    print("Using headers with Reddit credentials (values redacted for security):")
-    redacted_headers = {
-        k: (v[:5] + "..." if k.startswith("REDDIT-") and v else v) 
-        for k, v in headers.items()
-    }
-    print(f"Headers: {redacted_headers}")
+        print(f"Headers: {redacted_headers}")
+            
+        server_url = f"http://localhost:{args.mcp_localhost_port}/mcp"
+        print(f"Connecting to server at: {server_url}")
         
-    server_url = f"http://localhost:{args.mcp_localhost_port}/mcp"
-    print(f"Connecting to server at: {server_url}")
-    
-    asyncio.run(client.connect_to_streamable_http_server(
-        server_url,
-        headers=headers
-    ))
-    print("Connected to server successfully")
-    response=asyncio.run(client.chat_loop("wallstreetbets", 5))
+        await client.connect_to_streamable_http_server(
+            server_url,
+            headers=headers
+        )
+        print("Connected to server successfully")
+        response=await client.chat_loop("wallstreetbets", 5)
+        return response
+    response = run_async(fetch())
     final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {response}"
     final_response=groq_generate(final_prompt)
     st.session_state["chat_history"].append(
