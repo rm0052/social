@@ -18,6 +18,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from fastmcp import FastMCP
 from client import get_client
+import asyncio
 
 # Initialize FastMCP server for Airtable tools
 reddit_mcp = FastMCP(name="reddit-mcp-server")
@@ -321,7 +322,7 @@ if question:
         headers=headers
     )
     print("Connected to server successfully")
-    response=await client.chat_loop("wallstreetbets", 5)
+    response=asyncio.run(client.chat_loop("wallstreetbets", 5))
     final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {response}"
     final_response=groq_generate(final_prompt)
     st.session_state["chat_history"].append(
