@@ -20,6 +20,16 @@ from fastmcp import FastMCP
 from client import get_client
 import asyncio
 
+def run_async(coro):
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            return asyncio.create_task(coro)
+        else:
+            return loop.run_until_complete(coro)
+    except RuntimeError:
+        return asyncio.run(coro)
+
 # Initialize FastMCP server for Airtable tools
 reddit_mcp = FastMCP(name="reddit-mcp-server")
 
