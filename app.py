@@ -314,9 +314,9 @@ if question:
         client = get_client()
         headers = {
                 "X-Api-Key": "123",  # Basic API key for authentication
-                "REDDIT-CLIENT-ID": "Ly24yiY7yWoF5CboIG217w",
-                "REDDIT-CLIENT-SECRET": "iffbq4WIHgjEFUvsFFzAdqzbSsFYNQ",
-                "REDDIT-REFRESH-TOKEN": "123"
+                "REDDIT_CLIENT_ID="Nq4nwSo-4sQRxPSso70nJQ"
+                "REDDIT_CLIENT_SECRET="jrfgy8_UbQCQ6fMwpINviwDocUoLCg
+                "REDDIT_REFRESH_TOKEN="197287738010357-satTZRsUCK_69hDZmNCOeYyRmNk3Ww"
             }
         print("Using headers with Reddit credentials (values redacted for security):")
         redacted_headers = {
