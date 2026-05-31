@@ -131,7 +131,7 @@ async def fetch_reddit_hot_threads(subreddit: str, limit: int = 10) -> str:
             client = get_reddit_client(request)
             
             # Make the request to Reddit API
-            endpoint = f"/r/{'+'.join(subreddits)}/hot"
+            endpoint = f"/r/{subreddit}/hot"
             params = {"limit": limit}
             
             response = make_reddit_request(endpoint, client, params)
