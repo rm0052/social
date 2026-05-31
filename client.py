@@ -141,11 +141,11 @@ class MCPClient:
           print(f"Fetching hot threads from r/{subreddit}...")
           result = await self.session.call_tool(
               "fetch_reddit_hot_threads", 
-              {"subreddits": subreddits, "limit": limit}
+              {"subreddit": subreddit, "limit": limit}
           )
           
           # Process the response from the server using the helper method
-          response = await self._process_tool_response(result.content, f"/r/{'+'.join(subreddits)}")
+          response = await self._process_tool_response(result.content, f"r/{subreddit}")
           
           return response
       except Exception as e:
