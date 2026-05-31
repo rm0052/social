@@ -178,30 +178,22 @@ reddit = praw.Reddit(
 
 # --- App Setup ---
 st.title("Reddit News Chatbot")
-st.write('''Latest Social Media News (Reddit) Chatbot
-
-
-About the chatbot
-
-This chatbot will answer questions related to the latest (last 24 hours) social media news from specific Reddit groups. The groups included in this chatbot are: 
+st.write('''This chatbot will answer questions related to the latest (last 24 hours) social media news from specific Reddit groups. The groups included in this chatbot are: 
 
 For high-risk, high-reward trading and meme stocks: r/wallstreetbets
-For general stock discussions and investment strategies: r/stocks, r/investing
-For specific investment niches: r/pennystocks, r/Options, r/SecurityAnalysis, r/dividendinvesting
-For crypto related discussions: r/CryptoCurrency, r/CryptoMarkets, r/Bitcoin
 
-You can ask specific questions on companies or specific scenarios mentioned in these Reddit groups. Before using the chatbot, you need to “Fetch Reddit posts” first and then you can ask questions like:
+For general stock discussions and investment strategies: r/stocks
+
+For crypto related discussions: r/CryptoMarkets
+
 
 Can you summarize the discussions by group?
+
 Which stocks are mentioned in wallstreetbets?
+
 What specifically is being discussed about company X on wallstreetbets?
+
 What is the sentiment regarding company X on wallstreetbets?
-
-
-
-
-
-
 '''
         )
 
