@@ -115,7 +115,7 @@ def make_reddit_request(endpoint: str, credentials: Dict[str, str], params: Opti
         raise
 
 @reddit_mcp.tool()
-async def fetch_reddit_hot_threads(subreddits, limit: int = 10) -> str:
+async def fetch_reddit_hot_threads(subreddit: str, limit: int = 10) -> str:
         """
         Fetch hot threads from a specified subreddit using the Reddit MCP server
         
@@ -359,7 +359,7 @@ if question:
             headers=headers
         )
         print("Connected to server successfully")
-        response=await client.chat_loop(subreddits, 5)
+        response=await client.chat_loop("wallstreetbets", 5)
         return response
     response = run_async(fetch())
     final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {response}"
