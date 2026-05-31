@@ -186,6 +186,7 @@ For general stock discussions and investment strategies: r/stocks
 
 For crypto related discussions: r/CryptoMarkets
 
+You can ask questions like:
 
 Can you summarize the discussions by group?
 
