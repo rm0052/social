@@ -359,7 +359,7 @@ if question:
             headers=headers
         )
         print("Connected to server successfully")
-        response=await client.chat_loop("wallstreetbets", 5)
+        response=await client.chat_loop(subreddits, 5)
         return response
     response = run_async(fetch())
     final_prompt = f"Each link represents a Reddit post. Summarize the content of the post that the question refers to and answer the question. Question: {question} links: {response}"
