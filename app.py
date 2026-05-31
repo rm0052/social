@@ -115,7 +115,7 @@ def make_reddit_request(endpoint: str, credentials: Dict[str, str], params: Opti
         raise
 
 @reddit_mcp.tool()
-async def fetch_reddit_hot_threads(subreddis, limit: int = 10) -> str:
+async def fetch_reddit_hot_threads(subreddits, limit: int = 10) -> str:
         """
         Fetch hot threads from a specified subreddit using the Reddit MCP server
         
